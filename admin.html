@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin — R.D. Plumbing &amp; Heating</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --blue-900: #0c2d4e;
+      --blue-700: #1565a8;
+      --blue-100: #dbeafe;
+      --blue-50:  #eff6ff;
+      --red:      #dc2626;
+      --amber:    #f59e0b;
+      --green:    #16a34a;
+      --gray-900: #111827;
+      --gray-700: #374151;
+      --gray-500: #6b7280;
+      --gray-300: #d1d5db;
+      --gray-100: #f3f4f6;
+      --white:    #ffffff;
+      --radius:   8px;
+    }
+
+    html { font-size: 16px; }
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: var(--gray-100);
+      color: var(--gray-900);
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── Login screen ── */
+    .login-wrap {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+      background: linear-gradient(135deg, var(--blue-900), var(--blue-700));
+    }
+
+    .login-card {
+      background: var(--white);
+      border-radius: 16px;
+      padding: 2.5rem 2rem;
+      width: 100%;
+      max-width: 380px;
+      box-shadow: 0 20px 40px rgba(0,0,0,.3);
+      text-align: center;
+    }
+
+    .login-icon {
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .login-card h1 {
+      font-size: 1.35rem;
+      font-weight: 700;
+      margin-bottom: .25rem;
+    }
+
+    .login-card .sub {
+      font-size: .85rem;
+      color: var(--gray-500);
+      margin-bottom: 1.75rem;
+    }
+
+    .login-card label {
+      display: block;
+      font-size: .82rem;
+      font-weight: 600;
+      color: var(--gray-700);
+      text-align: left;
+      margin-bottom: .35rem;
+    }
+
+    .login-card input[type="password"] {
+      width: 100%;
+      padding: .75rem 1rem;
+      border: 1.5px solid var(--gray-300);
+      border-radius: var(--radius);
+      font-size: 1rem;
+      font-family: inherit;
+      outline: none;
+      transition: border-color .2s;
+      margin-bottom: 1rem;
+    }
+    .login-card input[type="password"]:focus {
+      border-color: var(--blue-700);
+      box-shadow: 0 0 0 3px rgba(21,101,168,.15);
+    }
+
+    .login-error {
+      display: none;
+      background: #fee2e2;
+      color: var(--red);
+      border-radius: var(--radius);
+      padding: .6rem .9rem;
+      font-size: .85rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+    }
+
+    .btn-login {
+      width: 100%;
+      padding: .85rem;
+      background: var(--blue-700);
+      color: var(--white);
+      border: none;
+      border-radius: var(--radius);
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: inherit;
+      transition: background .2s;
+    }
+    .btn-login:hover { background: var(--blue-900); }
+
+    .login-note {
+      margin-top: 1.25rem;
+      font-size: .75rem;
+      color: var(--gray-500);
+      line-height: 1.6;
+    }
+
+    /* ── Admin panel ── */
+    .admin-panel { display: none; }
+
+    .admin-header {
+      background: var(--blue-900);
+      color: var(--white);
+      padding: 1rem 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    .admin-header h1 { font-size: 1.1rem; font-weight: 700; }
+    .admin-header .sub { font-size: .78rem; opacity: .7; margin-top: .1rem; }
+
+    .admin-actions { display: flex; gap: .75rem; flex-wrap: wrap; }
+
+    .btn-sm {
+      padding: .45rem .9rem;
+      border-radius: 6px;
+      font-size: .82rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1.5px solid transparent;
+      font-family: inherit;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: .35rem;
+      transition: opacity .2s;
+    }
+    .btn-sm:hover { opacity: .85; }
+    .btn-sm--white  { background: var(--white); color: var(--blue-900); }
+    .btn-sm--danger { background: var(--red);   color: var(--white); }
+    .btn-sm--logout { background: transparent; color: var(--white); border-color: rgba(255,255,255,.4); }
+
+    .admin-body { padding: 1.5rem; max-width: 1400px; margin: 0 auto; }
+
+    /* Notice bar */
+    .notice {
+      background: var(--blue-50);
+      border: 1.5px solid var(--blue-100);
+      border-radius: var(--radius);
+      padding: .875rem 1rem;
+      font-size: .85rem;
+      color: var(--gray-700);
+      margin-bottom: 1.5rem;
+      line-height: 1.6;
+    }
+    .notice strong { color: var(--blue-700); }
+    .notice a { color: var(--blue-700); text-decoration: underline; }
+
+    /* Stats row */
+    .stats-row {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      margin-bottom: 1.5rem;
+    }
+    .stat-card {
+      background: var(--white);
+      border-radius: var(--radius);
+      padding: 1rem 1.25rem;
+      box-shadow: 0 1px 4px rgba(0,0,0,.08);
+      min-width: 140px;
+    }
+    .stat-card__num   { font-size: 1.75rem; font-weight: 800; color: var(--blue-700); }
+    .stat-card__label { font-size: .78rem; color: var(--gray-500); text-transform: uppercase; letter-spacing: .05em; }
+
+    /* Table */
+    .table-wrap {
+      background: var(--white);
+      border-radius: 12px;
+      box-shadow: 0 1px 4px rgba(0,0,0,.08);
+      overflow: hidden;
+    }
+
+    .table-header {
+      padding: 1rem 1.25rem;
+      border-bottom: 1px solid var(--gray-300);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+    .table-header h2 { font-size: 1rem; font-weight: 700; }
+
+    .table-scroll { overflow-x: auto; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: .85rem;
+    }
+
+    thead th {
+      background: var(--gray-100);
+      padding: .75rem 1rem;
+      text-align: left;
+      font-size: .75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      color: var(--gray-500);
+      white-space: nowrap;
+      border-bottom: 1px solid var(--gray-300);
+    }
+
+    tbody tr { border-bottom: 1px solid var(--gray-100); }
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background: var(--blue-50); }
+
+    tbody td {
+      padding: .875rem 1rem;
+      vertical-align: top;
+      color: var(--gray-700);
+      max-width: 220px;
+    }
+
+    tbody td:first-child {
+      color: var(--gray-500);
+      font-size: .78rem;
+      white-space: nowrap;
+    }
+
+    .td-name { font-weight: 600; color: var(--gray-900) !important; white-space: nowrap; }
+    .td-phone a, .td-email a { color: var(--blue-700); text-decoration: underline; }
+
+    .td-service {
+      white-space: nowrap;
+    }
+
+    .td-desc {
+      font-size: .82rem;
+      line-height: 1.5;
+      word-break: break-word;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: .2rem .6rem;
+      border-radius: 999px;
+      font-size: .72rem;
+      font-weight: 700;
+    }
+    .badge--emergency { background: #fee2e2; color: var(--red); }
+    .badge--boiler    { background: #dbeafe; color: var(--blue-700); }
+    .badge--general   { background: var(--gray-100); color: var(--gray-700); }
+
+    .empty-state {
+      text-align: center;
+      padding: 3rem 1.5rem;
+      color: var(--gray-500);
+      font-size: .95rem;
+    }
+    .empty-state p { margin-bottom: .5rem; }
+
+    /* Responsive adjustments */
+    @media (max-width: 600px) {
+      .admin-body { padding: 1rem; }
+      .admin-header { padding: .875rem 1rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ── Login screen ── -->
+  <div class="login-wrap" id="login-screen">
+    <div class="login-card">
+      <div class="login-icon">🔒</div>
+      <h1>Admin Login</h1>
+      <p class="sub">R.D. Plumbing &amp; Heating</p>
+
+      <div class="login-error" id="login-error" role="alert">
+        Incorrect password. Please try again.
+      </div>
+
+      <form id="login-form" autocomplete="off" onsubmit="handleLogin(event)">
+        <label for="password-input">Password</label>
+        <input type="password" id="password-input" placeholder="Enter admin password"
+               autocomplete="current-password" autofocus>
+        <button type="submit" class="btn-login">Sign In</button>
+      </form>
+
+      <p class="login-note">
+        This page is for R.D. Plumbing &amp; Heating admin use only.<br>
+        All enquiry data is also available in your
+        <a href="https://formspree.io/forms" target="_blank" rel="noopener">Formspree dashboard</a>.
+      </p>
+    </div>
+  </div>
+
+
+  <!-- ── Admin panel (shown after login) ── -->
+  <div class="admin-panel" id="admin-panel">
+
+    <div class="admin-header">
+      <div>
+        <h1>📋 R.D. Plumbing &amp; Heating — Enquiries</h1>
+        <div class="sub">Submitted enquiries from the booking form</div>
+      </div>
+      <div class="admin-actions">
+        <a href="/" class="btn-sm btn-sm--white">← Back to Site</a>
+        <a href="https://formspree.io/forms" target="_blank" rel="noopener"
+           class="btn-sm btn-sm--white">Formspree Dashboard ↗</a>
+        <button class="btn-sm btn-sm--danger" onclick="confirmClear()">Clear All</button>
+        <button class="btn-sm btn-sm--logout" onclick="logout()">Log Out</button>
+      </div>
+    </div>
+
+    <div class="admin-body">
+
+      <div class="notice">
+        <strong>ℹ️ Note:</strong> This panel shows enquiries submitted from
+        <strong>this browser only</strong>, stored in localStorage.
+        For all submissions (from any device), visit your
+        <a href="https://formspree.io/forms" target="_blank" rel="noopener">Formspree dashboard</a>
+        or check the email notifications sent to your registered address.
+      </div>
+
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-card__num" id="count-total">0</div>
+          <div class="stat-card__label">Total Enquiries</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card__num" id="count-emergency">0</div>
+          <div class="stat-card__label">Emergency</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card__num" id="count-today">0</div>
+          <div class="stat-card__label">Today</div>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <div class="table-header">
+          <h2>All Enquiries <span style="font-weight:400;color:var(--gray-500)">(newest first)</span></h2>
+        </div>
+        <div class="table-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Received</th>
+                <th>Name</th>
+                <th>Phone</th>
+                <th>Email</th>
+                <th>Service</th>
+                <th>Preferred Time</th>
+                <th>Address</th>
+                <th>Description</th>
+                <th>Notes</th>
+              </tr>
+            </thead>
+            <tbody id="submissions-tbody">
+              <tr>
+                <td colspan="10">
+                  <div class="empty-state">
+                    <p>No enquiries yet from this browser.</p>
+                    <p style="font-size:.82rem">Check your Formspree dashboard for all submissions.</p>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    /* ================================================================
+       Admin — password & data logic
+       ================================================================
+
+       ⚠️  TO SET YOUR PASSWORD:
+           Change the string below. Use something hard to guess.
+           This is client-side auth — it protects casual access,
+           not a determined attacker. Keep the admin URL unlisted.
+    */
+    const ADMIN_PASSWORD = 'RDPlumbing2024!'; // ← Change before going live
+
+    const STORAGE_KEY = 'rd_plumbing_submissions';
+
+    /* ── Login ── */
+    function handleLogin(e) {
+      e.preventDefault();
+      const input = document.getElementById('password-input').value;
+      if (input === ADMIN_PASSWORD) {
+        sessionStorage.setItem('rd_admin_auth', 'ok');
+        showPanel();
+      } else {
+        document.getElementById('login-error').style.display = 'block';
+        document.getElementById('password-input').value = '';
+        document.getElementById('password-input').focus();
+      }
+    }
+
+    function logout() {
+      sessionStorage.removeItem('rd_admin_auth');
+      location.reload();
+    }
+
+    function showPanel() {
+      document.getElementById('login-screen').style.display = 'none';
+      document.getElementById('admin-panel').style.display  = 'block';
+      loadSubmissions();
+    }
+
+    /* ── Auto-login if session still valid ── */
+    if (sessionStorage.getItem('rd_admin_auth') === 'ok') {
+      showPanel();
+    }
+
+    /* ── Load & render submissions ── */
+    function loadSubmissions() {
+      let list = [];
+      try {
+        list = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+      } catch (_) {}
+
+      const tbody = document.getElementById('submissions-tbody');
+      const today = new Date().toDateString();
+
+      let emergency = 0;
+      let todayCount = 0;
+
+      if (list.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="10">
+          <div class="empty-state">
+            <p>No enquiries yet from this browser.</p>
+            <p style="font-size:.82rem">Check your <a href="https://formspree.io/forms" target="_blank">Formspree dashboard</a> for all submissions.</p>
+          </div></td></tr>`;
+      } else {
+        tbody.innerHTML = list.map((s, i) => {
+          const isEmergency = /emergency/i.test(s.service || '');
+          const isBoiler    = /boiler/i.test(s.service || '');
+          if (isEmergency) emergency++;
+          if (new Date(s._savedAt).toDateString() === today) todayCount++;
+
+          const badgeClass = isEmergency ? 'badge--emergency' : isBoiler ? 'badge--boiler' : 'badge--general';
+
+          return `<tr>
+            <td>${list.length - i}</td>
+            <td style="white-space:nowrap">${fmtDate(s._savedAt)}</td>
+            <td class="td-name">${esc(s.name)}</td>
+            <td class="td-phone"><a href="tel:${esc(s.phone)}">${esc(s.phone)}</a></td>
+            <td class="td-email"><a href="mailto:${esc(s.email)}">${esc(s.email)}</a></td>
+            <td class="td-service"><span class="badge ${badgeClass}">${esc(s.service)}</span></td>
+            <td style="white-space:nowrap">${fmtDate(s.preferred_datetime)}</td>
+            <td>${esc(s.address)}</td>
+            <td class="td-desc">${esc(s.description)}</td>
+            <td class="td-desc">${esc(s.notes) || '<span style="opacity:.4">—</span>'}</td>
+          </tr>`;
+        }).join('');
+      }
+
+      document.getElementById('count-total').textContent    = list.length;
+      document.getElementById('count-emergency').textContent = emergency;
+      document.getElementById('count-today').textContent    = todayCount;
+    }
+
+    /* ── Clear all ── */
+    function confirmClear() {
+      if (confirm('Delete ALL locally-stored enquiries? This cannot be undone.\n\n(Submissions in Formspree are unaffected.)')) {
+        localStorage.removeItem(STORAGE_KEY);
+        loadSubmissions();
+      }
+    }
+
+    /* ── Helpers ── */
+    function esc(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    function fmtDate(str) {
+      if (!str) return '—';
+      try {
+        return new Date(str).toLocaleString('en-GB', {
+          day: '2-digit', month: '2-digit', year: 'numeric',
+          hour: '2-digit', minute: '2-digit',
+        });
+      } catch (_) { return str; }
+    }
+  </script>
+
+</body>
+</html>
